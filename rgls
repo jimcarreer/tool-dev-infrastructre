@@ -1,0 +1,9 @@
+source settings;
+
+echo -n "User     : "
+read DUSER
+echo -n "Password :"
+read -s DPASS
+echo ""
+
+curl -X GET https://docker.${DEV_DNS_ROOT}:${DEV_EX_HTTPS_PORT}/v2/_catalog -k -s -u $DUSER:$DPASS | jq 

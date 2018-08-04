@@ -1,0 +1,5 @@
+source settings
+
+docker-compose stop gitlab-runner
+rm -rf $DEV_VOL_ROOT/gitlab-runner
+docker-compose start gitlab-runner 

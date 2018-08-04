@@ -1,0 +1,15 @@
+echo -n "Rule Prefix: "
+read RULE
+RULE="${RULE}_FILTER"
+
+RULELINE=`iptables -L DOCKER-USER --line-number | grep "$RULE" | grep -oP "^\d+"`
+
+if [[ ! "$RULELINE" =~ ^[[:digit:]]+$ ]]; then
+  echo "Rule not found $RULE"
+  exit 1
+fi
+
+iptables -F $RULE
+iptables -D DOCKER-USER $RULELINE
+iptables -X $RULE
+/sbin/service iptables save

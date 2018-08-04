@@ -1,0 +1,13 @@
+source settings
+
+echo -n "Token : "
+read -s RUNNERTOKEN
+
+docker-compose exec gitlab-runner gitlab-runner register \
+      --non-interactive \
+      --registration-token $RUNNERTOKEN \
+      --url https://gitlab.$DEV_DNS_ROOT:$DEV_EX_HTTPS_PORT/ \
+      --executor docker \
+      --docker-wait-for-services-timeout 120 \
+      --docker-volumes "/var/run/docker.sock:/var/run/docker.sock:Z" \
+      --docker-image docker.${DEV_DNS_ROOT}:${DEV_EX_HTTPS_PORT}/jvm-build-agents:latest

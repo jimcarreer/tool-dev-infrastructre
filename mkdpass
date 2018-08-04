@@ -1,0 +1,5 @@
+source settings
+echo -n "Docker username: "
+read DOCKERUSER
+echo -n "$DOCKERUSER:" >> $DEV_VOL_ROOT/nginx/conf.d/docker.htpasswd
+openssl passwd -apr1 >> $DEV_VOL_ROOT/nginx/conf.d/docker.htpasswd

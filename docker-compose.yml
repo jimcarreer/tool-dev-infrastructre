@@ -1,0 +1,72 @@
+version: "3"
+
+networks:
+  devinfra:
+    ipam:
+      driver: default
+      config:
+        - subnet: ${DEV_INF_NET}
+
+services:
+
+  gitlab:
+    image: gitlab/gitlab-ce:latest
+    hostname: gitlab.${DEV_DNS_ROOT}
+    volumes:
+      - ${DEV_VOL_ROOT}/gitlab/data:/var/opt/gitlab:Z
+      - ${DEV_VOL_ROOT}/gitlab/etc:/etc/gitlab:Z
+      - ${DEV_VOL_ROOT}/logs/gitlab:/var/log/gitlab:Z
+      - ${DEV_CERT_ROOT}:/etc/letsencrypt/:ro
+    networks:
+      - devinfra
+    ports:
+      - '${DEV_EX_SSH_PORT}:22'
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |-
+        external_url 'https://gitlab.${DEV_DNS_ROOT}:${DEV_EX_HTTPS_PORT}';
+        gitlab_rails['gitlab_shell_ssh_host'] = 'gitlab.${DEV_DNS_ROOT}';
+        gitlab_rails['gitlab_shell_ssh_port'] = ${DEV_EX_SSH_PORT};
+        nginx['listen_https'] = false;
+        nginx['listen_port'] = 80;
+
+  gitlab-runner:
+    image: gitlab/gitlab-runner:latest
+    hostname: gitlab-runner.${DEV_DNS_ROOT}
+    networks:
+      - devinfra
+    volumes:
+      # Allow this container to spawn others on host, may need special selinux module:
+      # https://github.com/dpw/selinux-dockersock
+      - /var/run/docker.sock:/var/run/docker.sock:Z
+      - ${DEV_VOL_ROOT}/gitlab-runner/home:/home/gitlab-runner:Z
+      - ${DEV_VOL_ROOT}/gitlab-runner/conf:/etc/gitlab-runner:Z
+      - /root/.docker/:/root/.docker/:ro
+  docker-reg:
+    image: registry:2
+    hostname: docker.${DEV_DNS_ROOT}
+    networks:
+      - devinfra
+    environment:
+      REGISTRY_HTTP_ADDR: 0.0.0.0:80
+
+  art:
+    image: docker.bintray.io/jfrog/artifactory-oss:latest
+    hostname: art.${DEV_DNS_ROOT}
+    networks:
+      - devinfra
+    volumes:
+      - ${DEV_VOL_ROOT}/artifactory/data:/var/opt/jfrog/artifactory:Z
+
+  nginx:
+    image: nginx
+    hostname: nginx.${DEV_DNS_ROOT}
+    ports:
+      - ${DEV_EX_HTTPS_PORT}:${DEV_EX_HTTPS_PORT}
+    volumes:
+      - ${DEV_VOL_ROOT}/logs/:/var/log:Z
+      - ${DEV_VOL_ROOT}/nginx/conf.d/:/etc/nginx/conf.d/:ro
+      - ${DEV_CERT_ROOT}:/etc/nginx/certs/:ro
+    networks:
+      - devinfra
+    depends_on:
+      - gitlab

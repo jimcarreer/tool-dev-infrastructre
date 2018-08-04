@@ -1,0 +1,13 @@
+source settings
+
+mkdir -p ${DEV_VOL_ROOT}/logs
+mkdir -p ${DEV_VOL_ROOT}/logs/nginx
+mkdir -p ${DEV_VOL_ROOT}/logs/gitlab
+mkdir -p ${DEV_VOL_ROOT}/gitlab/data
+mkdir -p ${DEV_VOL_ROOT}/gitlab/etc
+mkdir -p ${DEV_VOL_ROOT}/nginx/conf.d/
+mkdir -p ${DEV_VOL_ROOT}/artifactory/data
+mkdir -p ${DEV_VOL_ROOT}/gitlab-runner/home
+mkdir -p ${DEV_VOL_ROOT}/gitlab-runner/conf
+
+docker-compose up -d

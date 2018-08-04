@@ -1,0 +1,43 @@
+source ../settings
+
+GRADLE_VER=4.3.1
+JDK_VER=8
+
+mkdir -p ./build-agent/
+cp -r ./build-helpers ./build-agent/build-helpers/
+cd ./build-agent
+
+SSHCAN=$(ssh-keyscan -p $DEV_EX_SSH_PORT gitlab.$DEV_DNS_ROOT)
+
+wget https://services.gradle.org/distributions/gradle-4.3.1-bin.zip
+unzip gradle-4.3.1-bin.zip
+rm gradle-4.3.1-bin.zip
+
+echo "
+FROM java:${JDK_VER}-jdk
+
+# Tools
+ADD ./gradle-4.3.1/ /opt/gradle/
+ADD ./build-helpers/tag-release /usr/bin/tag-release
+
+# So tagger script can push tags (work around for runner not being able to push refs via https)
+ENV GITLAB_SSH_BASE="git@gitlab.$DEV_DNS_ROOT:$DEV_EX_SSH_PORT"
+RUN mkdir ~/.ssh/
+RUN chmod 700 ~/.ssh/
+RUN echo "$SSHCAN" > ~/.ssh/known_hosts
+RUN chmod 644 ~/.ssh/known_hosts
+RUN git config --global user.email "build-agent@gravis.io"
+RUN git config --global user.name "Build Agent"
+
+# Debuggery
+RUN echo "JDK            : ${JDK_VER}" > /opt/versions
+RUN echo "Gradle Version : ${GRADLE_VER}" > /opt/versions
+
+ENV PATH \"\$PATH:/opt/gradle/bin/\"
+
+" > Dockerfile
+docker build ./ --tag docker.$DEV_DNS_ROOT:$DEV_EX_HTTPS_PORT/jvm-build-agents:latest
+docker push docker.$DEV_DNS_ROOT:$DEV_EX_HTTPS_PORT/jvm-build-agents:latest
+
+cd ..
+rm -rf ./build-agent/ 

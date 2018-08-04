@@ -1,0 +1,80 @@
+source settings
+
+echo "
+
+server {
+   listen 80;
+    
+   location / {
+     root /var/www;
+   }
+}
+
+server {
+    listen               $DEV_EX_HTTPS_PORT ssl;
+    ssl_certificate      /etc/nginx/certs/live/$DNS_ROOT/fullchain.pem;
+    ssl_certificate_key  /etc/nginx/certs/live/$DNS_ROOT/privkey.pem;
+    ssl_protocols        TLSv1 TLSv1.1 TLSv1.2;
+    ssl_ciphers          HIGH:!aNULL:!MD5;
+
+    location / {
+        return 404;
+    }
+}
+
+server {
+    listen              $DEV_EX_HTTPS_PORT ssl;
+    server_name         gitlab.$DEV_DNS_ROOT;
+    ssl_certificate     /etc/nginx/certs/live/$DNS_ROOT/fullchain.pem;
+    ssl_certificate_key /etc/nginx/certs/live/$DNS_ROOT/privkey.pem;
+    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;
+    ssl_ciphers         HIGH:!aNULL:!MD5;
+
+    location / {
+        proxy_pass http://gitlab:80;
+        proxy_set_header Host \$http_host;
+    }
+}
+
+server {
+     listen              $DEV_EX_HTTPS_PORT ssl;
+     server_name         art.$DEV_DNS_ROOT;
+     ssl_certificate     /etc/nginx/certs/live/$DNS_ROOT/fullchain.pem;
+     ssl_certificate_key /etc/nginx/certs/live/$DNS_ROOT/privkey.pem;
+     ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;
+     ssl_ciphers         HIGH:!aNULL:!MD5;
+   
+     location / {
+         return 301 https://art.$DEV_DNS_ROOT:$DEV_EX_HTTPS_PORT/artifactory/webapp/;
+     }
+
+     location /artifactory {
+         proxy_pass http://art:8081;
+         #proxy_pass http://gitlab:80;
+         proxy_set_header Host \$http_host;
+         proxy_set_header X-Artifactory-Override-Base-Url https://art.$DEV_DNS_ROOT/artifactory;
+     }
+ }
+
+server {
+    listen                    $DEV_EX_HTTPS_PORT ssl;
+    server_name               docker.$DEV_DNS_ROOT;
+    ssl_certificate           /etc/nginx/certs/live/$DNS_ROOT/cert.pem;
+    ssl_certificate_key       /etc/nginx/certs/live/$DNS_ROOT/privkey.pem;
+    ssl_protocols             TLSv1 TLSv1.1 TLSv1.2;
+    ssl_ciphers               HIGH:!aNULL:!MD5;
+    client_max_body_size      0;
+    chunked_transfer_encoding on;
+ 
+    location / {
+        auth_basic           'Docker Registry';
+        auth_basic_user_file conf.d/docker.htpasswd;
+        proxy_pass           http://docker-reg:80;
+        proxy_set_header     Host \$http_host;
+        proxy_set_header     X-Real-IP \$remote_addr;
+        proxy_set_header     X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header     X-Forwarded-Proto \$scheme;
+        proxy_read_timeout   900;
+    }
+}
+" > $DEV_VOL_ROOT/nginx/conf.d/dev.conf

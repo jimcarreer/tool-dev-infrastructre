@@ -1,0 +1,21 @@
+source settings
+
+echo -n "IP Address: "
+read IPADDR
+
+echo -n "Rule Prefix: "
+read RULE
+RULE="${RULE}_FILTER"
+
+iptables -N "${RULE}"
+ERRCODE=$?
+if [ $ERRCODE -ne 0 ]; then
+  echo "New rule chain for ${RULEPREFIX} could not be created"
+  exit $ERRCODE
+fi
+
+iptables -A "$RULE" -d ${DEV_INF_NET} -s "$IPADDR" -j ACCEPT
+iptables -A "$RULE" -s ${DEV_INF_NET} -d "$IPADDR" -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+iptables -A "$RULE" -j RETURN
+iptables -I "DOCKER-USER" -j "$RULE"
+/sbin/service iptables save

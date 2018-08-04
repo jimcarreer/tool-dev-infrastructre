@@ -1,0 +1,10 @@
+source settings
+
+iptables -N DEV-NET-LOCKDOWN
+# Drop everything trying to get in
+iptables -I DEV-NET-LOCKDOWN -d ${DEV_INF_NET} -j DROP
+# Allow containers to connect out
+iptables -I DEV-NET-LOCKDOWN -d ${DEV_INF_NET} -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+iptables -I DEV-NET-LOCKDOWN -s ${DEV_INF_NET -j ACCEPT
+iptables -I DOCKER-USER -j DEV-NET-LOCKDOWN
+/sbin/service iptables save
