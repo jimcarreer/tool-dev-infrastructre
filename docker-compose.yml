@@ -10,6 +10,7 @@ networks:
 services:
 
   gitlab:
+    restart: always
     image: gitlab/gitlab-ce:latest
     hostname: gitlab.${DEV_DNS_ROOT}
     volumes:
@@ -30,6 +31,7 @@ services:
         nginx['listen_port'] = 80;
 
   gitlab-runner:
+    restart: always
     image: gitlab/gitlab-runner:latest
     hostname: gitlab-runner.${DEV_DNS_ROOT}
     networks:
@@ -42,6 +44,7 @@ services:
       - ${DEV_VOL_ROOT}/gitlab-runner/conf:/etc/gitlab-runner:Z
       - /root/.docker/:/root/.docker/:ro
   docker-reg:
+    restart: always
     image: registry:2
     hostname: docker.${DEV_DNS_ROOT}
     networks:
@@ -50,6 +53,7 @@ services:
       REGISTRY_HTTP_ADDR: 0.0.0.0:80
 
   art:
+    restart: always
     image: docker.bintray.io/jfrog/artifactory-oss:latest
     hostname: art.${DEV_DNS_ROOT}
     networks:
@@ -58,6 +62,7 @@ services:
       - ${DEV_VOL_ROOT}/artifactory/data:/var/opt/jfrog/artifactory:Z
 
   nginx:
+    restart: always
     image: nginx
     hostname: nginx.${DEV_DNS_ROOT}
     ports:

@@ -59,7 +59,7 @@ server {
 server {
     listen                    $DEV_EX_HTTPS_PORT ssl;
     server_name               docker.$DEV_DNS_ROOT;
-    ssl_certificate           /etc/nginx/certs/live/$DNS_ROOT/cert.pem;
+    ssl_certificate           /etc/nginx/certs/live/$DNS_ROOT/fullchain.pem;
     ssl_certificate_key       /etc/nginx/certs/live/$DNS_ROOT/privkey.pem;
     ssl_protocols             TLSv1 TLSv1.1 TLSv1.2;
     ssl_ciphers               HIGH:!aNULL:!MD5;
