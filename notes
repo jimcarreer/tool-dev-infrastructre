@@ -1,11 +1,6 @@
 # alias for running certbot in docker cause centos sucks
 alias certbot='docker run --rm -ti -v /etc/letsencrypt:/etc/letsencrypt -p 80:80 certbot/certbot:latest'
 
-# certbot examples using verfication by DNS TXT records
-certbot certonly --manual -d *.gravis.io --preferred-challenges dns-01 --server https://acme-v02.api.letsencrypt.org/directory
-certbot certonly --manual -d gitlab.dev.gravis.io --preferred-challenges dns-01 --server https://acme-v02.api.letsencrypt.org/directory
-certbot certonly --manual -d art.dev.gravis.io --preferred-challenges dns-01 --server https://acme-v02.api.letsencrypt.org/directory
-
 # Updating java cert chain with custom CA example, probably dont need to do this anymore kind of handy to know though
 update-ca-certificates
 keytool -import -alias 'pipelineca' -keystore $JAVA_HOME/jre/lib/security/cacerts -trustcacerts -file /usr/local/ca-certificates/cacert.crt -storepass changeit -noprompt
@@ -15,5 +10,5 @@ docker-compose exec gitlab-runner gitlab-runner register
 
 # Make sure nginx is configured to use fullchain.pem not cert.pem
 
-# Use command to expand cert:
+# Use command to renew / expand:
 certbot certonly --manual --agree-tos --expand -d *.gravis.io,art.dev.gravis.io,docker.dev.gravis.io,gitlab.dev.gravis.io --preferred-challenges dns-01 --server https://acme-v02.api.letsencrypt.org/directory
