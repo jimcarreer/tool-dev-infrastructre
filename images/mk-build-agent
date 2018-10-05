@@ -13,21 +13,20 @@ wget https://services.gradle.org/distributions/gradle-4.3.1-bin.zip
 unzip gradle-4.3.1-bin.zip
 rm gradle-4.3.1-bin.zip
 
+wget https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64
+mv jq-linux64 jq
+chmod +x jq
+
 echo "
 FROM java:${JDK_VER}-jdk
 
 # Tools
+ADD ./jq /usr/bin/jq
 ADD ./gradle-4.3.1/ /opt/gradle/
 ADD ./build-helpers/tag-release /usr/bin/tag-release
 
-# So tagger script can push tags (work around for runner not being able to push refs via https)
-ENV GITLAB_SSH_BASE="git@gitlab.$DEV_DNS_ROOT:$DEV_EX_SSH_PORT"
-RUN mkdir ~/.ssh/
-RUN chmod 700 ~/.ssh/
-RUN echo "$SSHCAN" > ~/.ssh/known_hosts
-RUN chmod 644 ~/.ssh/known_hosts
-RUN git config --global user.email "build-agent@gravis.io"
-RUN git config --global user.name "Build Agent"
+# So tagger can use API to tag releases
+ENV GITLAB_HTTPS_BASE="gitlab.$DEV_DNS_ROOT:$DEV_EX_HTTPS_PORT"
 
 # Debuggery
 RUN echo "JDK            : ${JDK_VER}" > /opt/versions

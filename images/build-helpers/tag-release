@@ -1,22 +1,8 @@
 RELEASE=$(gradle properties | grep ^version: | sed 's/version: //g')
 RELEASE="release/$RELEASE"
+REFCSHA=$(git rev-parse HEAD)
 
-PREVREL=$(git rev-list -n 1 $RELEASE)
-
-echo "Setting private key for remote repo"
-echo "$BUILD_AGENT_PRIVATE_KEY" > ~/.ssh/id_rsa
-chmod 700 ~/.ssh/id_rsa 
-
-REPO="ssh://$GITLAB_SSH_BASE/$CI_PROJECT_PATH.git"
-echo "Cloning $REPO to temp dir "
-mkdir -p /tmp/
-cd /tmp/
-git clone $REPO tagger-repo
-cd tagger-repo
-
-echo "Tagging release $RELEASE"
-git tag $RELEASE
-git push origin $RELEASE
-
-cd ..
-rm -rf /tmp/tagger-repo/
+curl -s -X POST https://$GITLAB_HTTPS_BASE/api/v4/projects/$CI_PROJECT_ID/repository/tags \
+-H "PRIVATE-TOKEN: ${BUILD_AGENT_TOKEN}" \
+-H "Content-Type: application/json; charset=utf-8" \
+-d "{\"tag_name\": \"$RELEASE\", \"ref\": \"$REFCSHA\"}" | jq '.'
