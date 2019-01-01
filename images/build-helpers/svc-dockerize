@@ -1,0 +1,67 @@
+#!/bin/bash
+
+# Expected externally provided vars:
+# DOCKER_PUB_URL  Full url (with scheme) of repo to publish images to
+# DOCKER_PUB_PASS Password for repo specified by DOCKER_PUB_URL
+# DOCKER_PUB_USER Username for repo specified by DOCKER_PUB_URL  
+# Note: it is also expected that docker login ... has already been run for the above rep
+
+GRADLE_PROPERTIES=$(gradle properties)
+SERVICE_NAME=$(echo "$GRADLE_PROPERTIES" | grep ^name: | sed 's/name: //g')
+SERVICE_VERSION=$(echo "$GRADLE_PROPERTIES" | grep ^version: | sed 's/version: //g')
+SERVICE_GROUP=$(echo "$GRADLE_PROPERTIES" | grep ^group: | sed 's/group: //g')
+DOCKER_DIR="./build/dockerimg/"
+SERVICE_TAR="./build/distributions/$SERVICE_NAME-$SERVICE_VERSION.tar"
+
+gradle distTar
+
+echo
+echo "Service properties: "
+echo " - Group   : $SERVICE_GROUP"
+echo " - Name    : $SERVICE_NAME"
+echo " - Version : $SERVICE_VERSION"
+echo
+
+mkdir -p $DOCKER_DIR
+cp $SERVICE_TAR $DOCKER_DIR/service.tar
+
+cd $DOCKER_DIR
+cat > Dockerfile << DOCKERFILE_EOF
+FROM java:8
+
+MAINTAINER $SERVICE_GROUP
+
+ADD service.tar /tmp/
+
+RUN mv /tmp/$SERVICE_NAME-$SERVICE_VERSION /service
+RUN mkdir -p /service/logs/
+
+WORKDIR /service
+
+ENV GIO_LOG_DIRC "/service/logs/"
+ENV GIO_LOG_FILES "true"
+
+ENTRYPOINT [ "/service/bin/$SERVICE_NAME" ]
+
+EXPOSE 8443
+
+HEALTHCHECK CMD curl --fail http://localhost:8080/kube/healthy || exit 1
+DOCKERFILE_EOF
+
+TAGGED_VERSION="$SERVICE_GROUP/$SERVICE_NAME:$SERVICE_VERSION"
+TAGGED_LATEST="$SERVICE_GROUP/$SERVICE_NAME:latest"
+# $DOCKER_PUB_URL provided by CI/CD Environment
+if [ ! -z "$DOCKER_PUB_URL" ]; then
+  TAGGED_VERSION="$DOCKER_PUB_URL/$TAGGED_VERSION"
+  TAGGED_LATEST="$DOCKER_PUB_URL/$TAGGED_LATEST"
+fi
+
+docker build -t $TAGGED_VERSION -t $TAGGED_LATEST .
+
+if [ ! -z "$DOCKER_PUB_URL" ]; then
+  echo "Publishing image to https://$DOCKER_PUB_URL"
+  docker login -p $DOCKER_PUB_PASS -u $DOCKER_PUB_USER "https://$DOCKER_PUB_URL"
+  docker push $TAGGED_VERSION
+  docker push $TAGGED_LATEST
+fi
+

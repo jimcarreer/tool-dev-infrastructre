@@ -24,13 +24,12 @@ FROM java:${JDK_VER}-jdk
 ADD ./jq /usr/bin/jq
 ADD ./gradle-4.3.1/ /opt/gradle/
 ADD ./build-helpers/tag-release /usr/bin/tag-release
-
-# So tagger can use API to tag releases
-ENV GITLAB_HTTPS_BASE="gitlab.$DEV_DNS_ROOT:$DEV_EX_HTTPS_PORT"
+ADD ./build-helpers/svc-dockerize /usr/bin/svc-dockerize
 
 # Debuggery
 RUN echo "JDK            : ${JDK_VER}" > /opt/versions
 RUN echo "Gradle Version : ${GRADLE_VER}" > /opt/versions
+RUN curl -sSL https://get.docker.com/ | sh
 
 ENV PATH \"\$PATH:/opt/gradle/bin/\"
 
