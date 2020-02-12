@@ -1,0 +1,11 @@
+version: "3"
+
+services:
+  art:
+    restart: always
+    image: docker.bintray.io/jfrog/artifactory-oss:latest
+    hostname: art.${DEV_DNS_ROOT}
+    networks:
+      - devinfra
+    volumes:
+      - ${DEV_VOL_ROOT}/artifactory/data:/var/opt/jfrog/artifactory:Z
