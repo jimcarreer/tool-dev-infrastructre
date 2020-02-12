@@ -1,4 +1,4 @@
-source settings
+source .env
 
 echo -n "Token : "
 read -s RUNNERTOKEN

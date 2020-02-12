@@ -43,23 +43,17 @@ services:
       - ${DEV_VOL_ROOT}/gitlab-runner/home:/home/gitlab-runner:Z
       - ${DEV_VOL_ROOT}/gitlab-runner/conf:/etc/gitlab-runner:Z
       - /root/.docker/:/root/.docker/:ro
-  docker-reg:
+  
+  docker-registry:
     restart: always
     image: registry:2
     hostname: docker.${DEV_DNS_ROOT}
     networks:
       - devinfra
+    volumes:
+      - ${DEV_VOL_ROOT}/docker-registry/:/var/lib/registry:Z
     environment:
       REGISTRY_HTTP_ADDR: 0.0.0.0:80
-
-  art:
-    restart: always
-    image: docker.bintray.io/jfrog/artifactory-oss:latest
-    hostname: art.${DEV_DNS_ROOT}
-    networks:
-      - devinfra
-    volumes:
-      - ${DEV_VOL_ROOT}/artifactory/data:/var/opt/jfrog/artifactory:Z
 
   nginx:
     restart: always

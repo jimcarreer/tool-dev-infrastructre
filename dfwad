@@ -1,4 +1,4 @@
-source settings
+source .env
 
 echo -n "IP Address: "
 read IPADDR

@@ -1,4 +1,4 @@
-source settings
+source .env
 
 iptables -N DEV-NET-LOCKDOWN
 # Drop everything trying to get in

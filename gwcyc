@@ -1,3 +1,0 @@
-source settings
-
-docker-compose restart nginx

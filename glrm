@@ -1,4 +1,4 @@
-source settings
+source .env
 
 docker-compose stop gitlab-runner
 rm -rf $DEV_VOL_ROOT/gitlab-runner

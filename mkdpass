@@ -1,4 +1,4 @@
-source settings
+source .env
 echo -n "Docker username: "
 read DOCKERUSER
 echo -n "$DOCKERUSER:" >> $DEV_VOL_ROOT/nginx/conf.d/docker.htpasswd

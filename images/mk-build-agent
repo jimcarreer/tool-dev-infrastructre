@@ -1,4 +1,4 @@
-source ../settings
+source ../.env
 
 GRADLE_VER=4.3.1
 JDK_VER=8
