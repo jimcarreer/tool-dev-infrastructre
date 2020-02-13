@@ -13,15 +13,13 @@ services:
     restart: always
     image: gitlab/gitlab-ce:latest
     hostname: gitlab.${DEV_DNS_ROOT}
-    networks:
-      devinfra:
-        aliases:
-          - gitlab.${DEV_DNS_ROOT}
     volumes:
       - ${DEV_VOL_ROOT}/gitlab/data:/var/opt/gitlab:Z
       - ${DEV_VOL_ROOT}/gitlab/etc:/etc/gitlab:Z
       - ${DEV_VOL_ROOT}/logs/gitlab:/var/log/gitlab:Z
       - ${DEV_CERT_ROOT}:/etc/letsencrypt/:ro
+    networks:
+      - devinfra
     ports:
       - '${DEV_EX_SSH_PORT}:22'
     environment:
@@ -37,9 +35,7 @@ services:
     image: gitlab/gitlab-runner:latest
     hostname: gitlab-runner.${DEV_DNS_ROOT}
     networks:
-      devinfra:
-        aliases:
-          - gitlab-runner.${DEV_DNS_ROOT}
+      - devinfra
     volumes:
       # Allow this container to spawn others on host, may need special selinux module:
       # https://github.com/dpw/selinux-dockersock
@@ -53,9 +49,7 @@ services:
     image: registry:2
     hostname: docker.${DEV_DNS_ROOT}
     networks:
-      devinfra:
-        aliases:
-          - docker.${DEV_DNS_ROOT}
+      - devinfra
     volumes:
       - ${DEV_VOL_ROOT}/docker-registry/:/var/lib/registry:Z
     environment:
@@ -65,10 +59,6 @@ services:
     restart: always
     image: nginx
     hostname: nginx.${DEV_DNS_ROOT}
-    networks:
-      devinfra:
-        aliases:
-          - nginx.${DEV_DNS_ROOT}
     ports:
       - ${DEV_EX_HTTPS_PORT}:${DEV_EX_HTTPS_PORT}
     volumes:
