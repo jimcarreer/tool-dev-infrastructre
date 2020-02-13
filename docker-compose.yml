@@ -20,6 +20,8 @@ services:
       - ${DEV_CERT_ROOT}:/etc/letsencrypt/:ro
     networks:
       - devinfra
+    external_links:
+      - nginx:docker.${DEV_DNS_ROOT}
     ports:
       - '${DEV_EX_SSH_PORT}:22'
     environment:
@@ -36,6 +38,9 @@ services:
     hostname: gitlab-runner.${DEV_DNS_ROOT}
     networks:
       - devinfra
+    external_links:
+      - nginx:gitlab.${DEV_DNS_ROOT}
+      - nginx:docker.${DEV_DNS_ROOT}
     volumes:
       # Allow this container to spawn others on host, may need special selinux module:
       # https://github.com/dpw/selinux-dockersock
