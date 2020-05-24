@@ -47,10 +47,8 @@ server {
     chunked_transfer_encoding on;
  
     location / {
-        limit_except GET {
-            auth_basic           'Docker Registry';
-            auth_basic_user_file conf.d/docker.htpasswd;
-        }
+        auth_basic           'Docker Registry';
+        auth_basic_user_file conf.d/docker.htpasswd;
         proxy_pass           http://docker-registry:80;
         proxy_set_header     Host \$http_host;
         proxy_set_header     X-Real-IP \$remote_addr;

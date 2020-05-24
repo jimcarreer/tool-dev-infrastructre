@@ -56,7 +56,7 @@ services:
     networks:
       - devinfra
     volumes:
-      - ${DEV_VOL_ROOT}/docker-registry/:/var/lib/registry:Z
+      - ${DEV_VOL_ROOT}/docker-registry/:/var/lib/registry:z
     environment:
       REGISTRY_HTTP_ADDR: 0.0.0.0:80
 
@@ -67,7 +67,7 @@ services:
     ports:
       - ${DEV_EX_HTTPS_PORT}:${DEV_EX_HTTPS_PORT}
     volumes:
-      - ${DEV_VOL_ROOT}/logs/:/var/log:Z
+      - ${DEV_VOL_ROOT}/logs/:/var/log:z
       - ${DEV_VOL_ROOT}/nginx/conf.d/:/etc/nginx/conf.d/:ro
       - ${DEV_CERT_ROOT}:/etc/nginx/certs/:ro
     networks:

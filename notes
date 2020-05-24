@@ -1,5 +1,11 @@
+Adding LAN IP of this box as the docker.dev.gravis.io / gitlab / etc ... usually is required for the git lab runner to connect
+
+# Save yourself headaches and set the context on vols recursively
+sudo chcon -R -t svirt_sandbox_file_t ./vols/
+
 # alias for running certbot in docker cause centos sucks
-alias certbot='docker run --rm -ti -v /etc/letsencrypt:/etc/letsencrypt -p 80:80 certbot/certbot:latest'
+alias certbot='docker run --rm -ti -v /etc/letsencrypt:/etc/letsencrypt certbot/certbot:latest'
+alias certbot='podman run --rm --security-opt label=disable -ti -v /mnt/raid/docker/dev-infra/vols/letsencrypt:/etc/letsencrypt  certbot/certbot:latest'
 
 # Updating java cert chain with custom CA example, probably dont need to do this anymore kind of handy to know though
 update-ca-certificates

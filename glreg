@@ -10,4 +10,4 @@ docker-compose exec gitlab-runner gitlab-runner register \
       --executor docker \
       --docker-wait-for-services-timeout 120 \
       --docker-volumes "/var/run/docker.sock:/var/run/docker.sock:Z" \
-      --docker-image docker.${DEV_DNS_ROOT}:${DEV_EX_HTTPS_PORT}/jvm-build-agents:latest
+      --docker-image ${BUILD_AGENT_IMAGE}
